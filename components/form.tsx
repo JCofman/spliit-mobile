@@ -1,5 +1,6 @@
 import { cn } from '@/utils/cn'
 import { BRAND_COLOR, bgBrand } from '@/utils/colors'
+import { parseLocaleNumber } from '@/utils/parseLocaleNumber'
 import { Category, Group, GroupParticipant, trpc } from '@/utils/trpc'
 import { errorMessages } from '@/utils/validation'
 import { FontAwesome6 } from '@expo/vector-icons'
@@ -188,44 +189,6 @@ function formatCurrency({
   return currency
     ? formattedAmount.replace('€', currency)
     : formattedAmount.replace(/\s*€\s*/, '')
-}
-
-function parseLocaleNumber({
-  numberString,
-  currency,
-}: {
-  numberString: string
-  locale?: string
-  currency?: string
-}) {
-  // Remove currency symbol and whitespace
-  const withoutCurrency = numberString.replace(currency ?? '', '').trim()
-
-  const lastDot = withoutCurrency.lastIndexOf('.')
-  const lastComma = withoutCurrency.lastIndexOf(',')
-  const lastSeparatorIndex = Math.max(lastDot, lastComma)
-
-  if (lastSeparatorIndex === -1) {
-    return parseFloat(withoutCurrency)
-  }
-
-  const charsAfterLastSeparator = withoutCurrency.length - lastSeparatorIndex - 1
-
-  // If 0, 1, or 2 digits follow the last separator, treat it as the decimal separator.
-  // Otherwise all separators are grouping separators (e.g. "1,000" or "1.000").
-  if (charsAfterLastSeparator <= 2) {
-    const decimalChar = withoutCurrency[lastSeparatorIndex]
-    if (decimalChar !== '.' && decimalChar !== ',') {
-      return parseFloat(withoutCurrency.replace(/[.,]/g, ''))
-    }
-    const groupingChar = decimalChar === '.' ? ',' : '.'
-    const normalized = withoutCurrency
-      .replace(new RegExp(`\\${groupingChar}`, 'g'), '')
-      .replace(decimalChar, '.')
-    return parseFloat(normalized)
-  }
-
-  return parseFloat(withoutCurrency.replace(/[.,]/g, ''))
 }
 
 export function CategoryInput({
