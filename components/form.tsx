@@ -192,26 +192,40 @@ function formatCurrency({
 
 function parseLocaleNumber({
   numberString,
-  locale,
   currency,
 }: {
   numberString: string
-  locale: string
+  locale?: string
   currency?: string
 }) {
-  const example = 12345.6
-  const formattedExample = new Intl.NumberFormat(locale).format(example)
+  // Remove currency symbol and whitespace
+  const withoutCurrency = numberString.replace(currency ?? '', '').trim()
 
-  const groupingSeparator = formattedExample.includes('12,345') ? ',' : '.'
-  const decimalSeparator = formattedExample.includes('.6') ? '.' : ','
+  const lastDot = withoutCurrency.lastIndexOf('.')
+  const lastComma = withoutCurrency.lastIndexOf(',')
+  const lastSeparatorIndex = Math.max(lastDot, lastComma)
 
-  // Remove grouping separators and replace decimal separator with a dot
-  const normalizedNumberString = numberString
-    .replace(new RegExp(`\\${groupingSeparator}`, 'g'), '')
-    .replace(new RegExp(`\\${decimalSeparator}`), '.')
-    .replace(currency ?? '', '')
+  if (lastSeparatorIndex === -1) {
+    return parseFloat(withoutCurrency)
+  }
 
-  return parseFloat(normalizedNumberString)
+  const charsAfterLastSeparator = withoutCurrency.length - lastSeparatorIndex - 1
+
+  // If 0, 1, or 2 digits follow the last separator, treat it as the decimal separator.
+  // Otherwise all separators are grouping separators (e.g. "1,000" or "1.000").
+  if (charsAfterLastSeparator <= 2) {
+    const decimalChar = withoutCurrency[lastSeparatorIndex]
+    if (decimalChar !== '.' && decimalChar !== ',') {
+      return parseFloat(withoutCurrency.replace(/[.,]/g, ''))
+    }
+    const groupingChar = decimalChar === '.' ? ',' : '.'
+    const normalized = withoutCurrency
+      .replace(new RegExp(`\\${groupingChar}`, 'g'), '')
+      .replace(decimalChar, '.')
+    return parseFloat(normalized)
+  }
+
+  return parseFloat(withoutCurrency.replace(/[.,]/g, ''))
 }
 
 export function CategoryInput({
