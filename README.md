@@ -1,3 +1,8 @@
+> [!WARNING]
+> This repository is archived, in favor of [spliit-app/spliit-ios](https://github.com/spliit-app/spliit-ios), a full rewrite of the iOS application with SwiftUI.
+
+---
+
 # Spliit Mobile
 
 This is the mobile version of [Spliit](https://spliit.app).
