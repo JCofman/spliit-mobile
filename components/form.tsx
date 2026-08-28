@@ -1,5 +1,6 @@
 import { cn } from '@/utils/cn'
 import { BRAND_COLOR, bgBrand } from '@/utils/colors'
+import { parseLocaleNumber } from '@/utils/parseLocaleNumber'
 import { Category, Group, GroupParticipant, trpc } from '@/utils/trpc'
 import { errorMessages } from '@/utils/validation'
 import { FontAwesome6 } from '@expo/vector-icons'
@@ -188,30 +189,6 @@ function formatCurrency({
   return currency
     ? formattedAmount.replace('€', currency)
     : formattedAmount.replace(/\s*€\s*/, '')
-}
-
-function parseLocaleNumber({
-  numberString,
-  locale,
-  currency,
-}: {
-  numberString: string
-  locale: string
-  currency?: string
-}) {
-  const example = 12345.6
-  const formattedExample = new Intl.NumberFormat(locale).format(example)
-
-  const groupingSeparator = formattedExample.includes('12,345') ? ',' : '.'
-  const decimalSeparator = formattedExample.includes('.6') ? '.' : ','
-
-  // Remove grouping separators and replace decimal separator with a dot
-  const normalizedNumberString = numberString
-    .replace(new RegExp(`\\${groupingSeparator}`, 'g'), '')
-    .replace(new RegExp(`\\${decimalSeparator}`), '.')
-    .replace(currency ?? '', '')
-
-  return parseFloat(normalizedNumberString)
 }
 
 export function CategoryInput({
